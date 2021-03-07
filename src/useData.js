@@ -15,7 +15,13 @@ export const useData = () => {
 
   useEffect(() => {
     text(textUrl).then((text) => {
-      setData(csvParseRows(text).map(parseRow));
+      const airports = {};
+      csvParseRows(text).map((row) => {
+        const d = parseRow(row);
+        if (d.IATA === "\\N") return;
+        airports[d.IATA] = [d.longitude, d.latitude];
+      });
+      setData(airports);
     });
   }, []);
 

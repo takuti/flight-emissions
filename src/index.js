@@ -1,19 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { geoDistance } from 'd3';
 import { useData } from './useData';
 
-const App = () => {
-  const data = useData();
+const earthRadius = 6371;
 
-  if (!data) {
+const App = () => {
+  const airports = useData();
+
+  if (!airports) {
     return <pre>Loading...</pre>;
   }
 
-  console.log(data);
+  console.log(airports);
 
   return (
     <div>
-      Read {data.length} airports.
+      <p>Read {Object.keys(airports).length} airports.</p>
+      <p>Distance between HND ({airports.HND.join(', ')}) and SFO ({airports.SFO.join(', ')}) is: {geoDistance(airports.HND, airports.SFO) * earthRadius}km</p>
     </div>
   );
 };

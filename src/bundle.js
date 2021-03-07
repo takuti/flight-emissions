@@ -22,24 +22,35 @@
 
     React.useEffect(function () {
       d3.text(textUrl).then(function (text) {
-        setData(d3.csvParseRows(text).map(parseRow));
+        var airports = {};
+        d3.csvParseRows(text).map(function (row) {
+          var d = parseRow(row);
+          if (d.IATA === "\\N") { return; }
+          airports[d.IATA] = [d.longitude, d.latitude];
+        });
+        setData(airports);
       });
     }, []);
 
     return data;
   };
 
-  var App = function () {
-    var data = useData();
+  var earthRadius = 6371;
 
-    if (!data) {
+  var App = function () {
+    var airports = useData();
+
+    if (!airports) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
 
-    console.log(data);
+    console.log(airports);
 
     return (
-      React__default['default'].createElement( 'div', null, "Read ", data.length, " airports." )
+      React__default['default'].createElement( 'div', null,
+        React__default['default'].createElement( 'p', null, "Read ", Object.keys(airports).length, " airports." ),
+        React__default['default'].createElement( 'p', null, "Distance between HND (", airports.HND.join(', '), ") and SFO (", airports.SFO.join(', '), ") is: ", d3.geoDistance(airports.HND, airports.SFO) * earthRadius, "km" )
+      )
     );
   };
 
