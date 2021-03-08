@@ -71,13 +71,13 @@ const App = () => {
               <>
                 <circle cx={x1} cy={y1} r={4} />
                 <circle cx={x2} cy={y2} r={4} />
-                <path
-                  className="route"
-                  d={path({ type: "LineString", coordinates: [src, dst] })}
-                />
               </>
             );
           })}
+          <path
+            className="route"
+            d={path({ type: "MultiLineString", coordinates: routes })}
+          />
         </g>
       </svg>
     </>
