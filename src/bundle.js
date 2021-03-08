@@ -37,19 +37,38 @@
 
   var earthRadius = 6371;
 
+  // https://www.bbc.com/news/science-environment-49349566
+  // 133g/km for domestic flight, 102g/km for long haul flight
+  var emissionsPerKm = (133 + 102) / 2;
+
   var App = function () {
     var airports = useData();
+
+    var routesRef = React.useRef();
+    var ref = React.useState('-');
+    var emissions = ref[0];
+    var setEmissions = ref[1];
+
+    var handleSubmit = React.useCallback(function (_) {
+      var totalKm = routesRef.current.value.split('\n').map(function (route) {
+        var ref = route.split('-');
+        var src = ref[0];
+        var dst = ref[1];
+        var dist = d3.geoDistance(airports[src], airports[dst]) * earthRadius;
+        return dist;
+      }).reduce(function (total, curr) { return total + curr; });
+      setEmissions(totalKm * emissionsPerKm);
+    });
 
     if (!airports) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
 
-    console.log(airports);
-
     return (
-      React__default['default'].createElement( 'div', null,
-        React__default['default'].createElement( 'p', null, "Read ", Object.keys(airports).length, " airports." ),
-        React__default['default'].createElement( 'p', null, "Distance between HND (", airports.HND.join(', '), ") and SFO (", airports.SFO.join(', '), ") is: ", d3.geoDistance(airports.HND, airports.SFO) * earthRadius, "km" )
+      React__default['default'].createElement( 'div', null, "Enter routes among between airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
+        React__default['default'].createElement( 'textarea', { ref: routesRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
+        React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
+        React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
       )
     );
   };
