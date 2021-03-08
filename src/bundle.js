@@ -1,4 +1,4 @@
-(function (React, ReactDOM, d3) {
+(function (React, ReactDOM, d3, topojson) {
   'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -35,19 +35,52 @@
     return data;
   };
 
+  var jsonUrl = 'https://unpkg.com/world-atlas@2.0.2/countries-50m.json';
+
+  var useWorldAtlas = function () {
+    var ref = React.useState(null);
+    var data = ref[0];
+    var setData = ref[1];
+
+    React.useEffect(function () {
+      d3.json(jsonUrl).then(function (topology) {
+        var ref = topology.objects;
+        var countries = ref.countries;
+        var land = ref.land;
+      	setData({
+          land: topojson.feature(topology, land),
+          interiors: topojson.mesh(topology, countries, function (a, b) { return a !== b; })
+        });
+      });
+    }, []);
+    
+    return data;
+  };
+
+  var width = 1024;
+  var height = 512;
+
   var earthRadius = 6371;
 
   // https://www.bbc.com/news/science-environment-49349566
   // 133g/km for domestic flight, 102g/km for long haul flight
   var emissionsPerKm = (133 + 102) / 2;
 
+  var projection = d3.geoNaturalEarth1();
+  var path = d3.geoPath(projection);
+  var graticule = d3.geoGraticule();
+
   var App = function () {
     var airports = useData();
+    var worldAtlas = useWorldAtlas();
 
     var routesRef = React.useRef();
-    var ref = React.useState('-');
-    var emissions = ref[0];
-    var setEmissions = ref[1];
+    var ref = React.useState([]);
+    var routes = ref[0];
+    var setRoutes = ref[1];
+    var ref$1 = React.useState('-');
+    var emissions = ref$1[0];
+    var setEmissions = ref$1[1];
 
     var handleSubmit = React.useCallback(function (_) {
       var totalKm = routesRef.current.value.split('\n').map(function (route) {
@@ -58,17 +91,55 @@
         return dist;
       }).reduce(function (total, curr) { return total + curr; });
       setEmissions(totalKm * emissionsPerKm);
+
+      setRoutes(routesRef.current.value.split('\n').map(function (route) {
+        var ref = route.split('-');
+        var src = ref[0];
+        var dst = ref[1];
+        return [airports[src], airports[dst]];
+      }));
     });
 
-    if (!airports) {
+    if (!airports || !worldAtlas) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
 
     return (
-      React__default['default'].createElement( 'div', null, "Enter routes among between airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
-        React__default['default'].createElement( 'textarea', { ref: routesRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
-        React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
-        React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
+      React__default['default'].createElement( React__default['default'].Fragment, null,
+        React__default['default'].createElement( 'div', null, "Enter routes among between airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
+          React__default['default'].createElement( 'textarea', { ref: routesRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
+          React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
+          React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
+        ),
+        React__default['default'].createElement( 'svg', { width: width, height: height },
+          React__default['default'].createElement( 'g', { className: "marks" },
+            React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
+            React__default['default'].createElement( 'path', { className: "graticule", d: path(graticule()) }),
+            worldAtlas.land.features.map(function (feature) { return (
+              React__default['default'].createElement( 'path', { className: "land", d: path(feature) })
+            ); }),
+            React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),
+            routes.map(function (ref) {
+              var src = ref[0];
+              var dst = ref[1];
+
+              var ref$1 = projection(src);
+              var x1 = ref$1[0];
+              var y1 = ref$1[1];
+              var ref$2 = projection(dst);
+              var x2 = ref$2[0];
+              var y2 = ref$2[1];
+              return (
+                React__default['default'].createElement( React__default['default'].Fragment, null,
+                  React__default['default'].createElement( 'circle', { cx: x1, cy: y1, r: 4 }),
+                  React__default['default'].createElement( 'circle', { cx: x2, cy: y2, r: 4 }),
+                  React__default['default'].createElement( 'path', {
+                    className: "route", d: path({ type: "LineString", coordinates: [src, dst] }) })
+                )
+              );
+            })
+          )
+        )
       )
     );
   };
@@ -76,4 +147,4 @@
   var rootElement = document.getElementById('root');
   ReactDOM__default['default'].render(React__default['default'].createElement( App, null ), rootElement);
 
-}(React, ReactDOM, d3));
+}(React, ReactDOM, d3, topojson));
