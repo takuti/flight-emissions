@@ -51,7 +51,7 @@ const App = () => {
   return (
     <>
       <div>
-        Enter routes among between airpots in IATA 3-letter code:<br />
+        Enter routes among airpots in IATA 3-letter code:<br />
         <textarea ref={routesRef} placeholder='HND-SFO\nSFO-JFK' /><br />
         <button onClick={handleSubmit}>Calculate CO2 Emissions</button>
         <p>Total CO2 emissions: {emissions}g</p>

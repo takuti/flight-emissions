@@ -106,7 +106,7 @@
 
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
-        React__default['default'].createElement( 'div', null, "Enter routes among between airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
+        React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'textarea', { ref: routesRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
           React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
