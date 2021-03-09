@@ -1,4 +1,4 @@
-(function (React, ReactDOM, d3, topojson) {
+(function (React, ReactDOM, d3, d3Timer, topojson) {
   'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -68,9 +68,9 @@
   // 133g/km for domestic flight, 102g/km for long haul flight
   var emissionsPerKm = (133 + 102) / 2;
 
-  var projection = d3.geoNaturalEarth1();
-  var path = d3.geoPath(projection);
   var graticule = d3.geoGraticule();
+  var rotateSpeed = 1e-2;
+  var startDate = Date.now();
 
   var App = function () {
     var airports = useAirports();
@@ -100,9 +100,24 @@
       setCoordinates(coords);
     });
 
+    var ref$2 = React.useState([0, 0]);
+    var angles = ref$2[0];
+    var setAngles = ref$2[1];
+    React.useEffect(function () {
+      var timerLoop = d3Timer.timer(function (_) {
+        var lambda = rotateSpeed * (Date.now() - startDate);
+        var phi = -15;
+        setAngles([lambda + 180, -phi]);
+      });
+      return function () { return timerLoop.stop(); };
+    }, []);
+
     if (!airports || !worldAtlas) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
+
+    var projection = d3.geoOrthographic().rotate(angles);
+    var path = d3.geoPath(projection);
 
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
@@ -147,4 +162,4 @@
   var rootElement = document.getElementById('root');
   ReactDOM__default['default'].render(React__default['default'].createElement( App, null ), rootElement);
 
-}(React, ReactDOM, d3, topojson));
+}(React, ReactDOM, d3, d3, topojson));

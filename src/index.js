@@ -1,11 +1,12 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { 
-  geoNaturalEarth1,
+  geoOrthographic,
   geoPath,
   geoGraticule,
-  geoDistance
+  geoDistance,
 } from 'd3';
+import { timer } from 'd3-timer';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
 
@@ -20,9 +21,9 @@ const earthRadius = 6371;
 // 133g/km for domestic flight, 102g/km for long haul flight
 const emissionsPerKm = (133 + 102) / 2;
 
-const projection = geoNaturalEarth1();
-const path = geoPath(projection);
 const graticule = geoGraticule();
+const rotateSpeed = 1e-2;
+const startDate = Date.now();
 
 const App = () => {
   const airports = useAirports();
@@ -46,9 +47,22 @@ const App = () => {
     setCoordinates(coords);
   });
 
+  const [angles, setAngles] = useState([0, 0]);
+  useEffect(() => {
+    const timerLoop = timer((_) => {
+      const lambda = rotateSpeed * (Date.now() - startDate);
+      const phi = -15;
+      setAngles([lambda + 180, -phi]);
+    });
+    return () => timerLoop.stop();
+  }, []);
+
   if (!airports || !worldAtlas) {
     return <pre>Loading...</pre>;
   }
+
+  const projection = geoOrthographic().rotate(angles);
+  const path = geoPath(projection);
 
   return (
     <>
