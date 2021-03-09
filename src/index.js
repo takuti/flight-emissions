@@ -6,7 +6,7 @@ import {
   geoGraticule,
   geoDistance
 } from 'd3';
-import { useData } from './useData';
+import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
 
 const width = 1024;
@@ -23,25 +23,24 @@ const path = geoPath(projection);
 const graticule = geoGraticule();
 
 const App = () => {
-  const airports = useData();
+  const airports = useAirports();
   const worldAtlas = useWorldAtlas();
 
-  const routesRef = useRef();
-  const [routes, setRoutes] = useState([]);
+  const inputRef = useRef();
+  const [coordinates, setCoordinates] = useState([]);
   const [emissions, setEmissions] = useState('-');
 
   const handleSubmit = useCallback(_ => {
-    const totalKm = routesRef.current.value.split('\n').map((route) => {
-      const [src, dst] = route.split('-');
-      const dist = geoDistance(airports[src], airports[dst]) * earthRadius;
-      return dist;
-    }).reduce((total, curr) => total + curr);
-    setEmissions(totalKm * emissionsPerKm);
+    const coords = [];
 
-    setRoutes(routesRef.current.value.split('\n').map((route) => {
+    const totalKm = inputRef.current.value.split('\n').map((route) => {
       const [src, dst] = route.split('-');
-      return [airports[src], airports[dst]];
-    }));
+      coords.push([airports[src], airports[dst]]);
+      return geoDistance(airports[src], airports[dst]) * earthRadius;
+    }).reduce((total, curr) => total + curr);
+
+    setEmissions(totalKm * emissionsPerKm);
+    setCoordinates(coords);
   });
 
   if (!airports || !worldAtlas) {
@@ -52,7 +51,7 @@ const App = () => {
     <>
       <div>
         Enter routes among airpots in IATA 3-letter code:<br />
-        <textarea ref={routesRef} placeholder='HND-SFO\nSFO-JFK' /><br />
+        <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK' /><br />
         <button onClick={handleSubmit}>Calculate CO2 Emissions</button>
         <p>Total CO2 emissions: {emissions}g</p>
       </div>
@@ -64,7 +63,7 @@ const App = () => {
             <path className="land" d={path(feature)} />
           ))}
           <path className="interiors" d={path(worldAtlas.interiors)} />
-          {routes.map(([src, dst]) => {
+          {coordinates.map(([src, dst]) => {
             const [x1, y1] = projection(src);
             const [x2, y2] = projection(dst);
             return (
@@ -76,7 +75,7 @@ const App = () => {
           })}
           <path
             className="route"
-            d={path({ type: "MultiLineString", coordinates: routes })}
+            d={path({ type: "MultiLineString", coordinates: coordinates })}
           />
         </g>
       </svg>

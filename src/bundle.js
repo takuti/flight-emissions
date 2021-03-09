@@ -15,7 +15,7 @@
     longitude: +row[7],
   }); };
 
-  var useData = function () {
+  var useAirports = function () {
     var ref = React.useState(null);
     var data = ref[0];
     var setData = ref[1];
@@ -71,33 +71,30 @@
   var graticule = d3.geoGraticule();
 
   var App = function () {
-    var airports = useData();
+    var airports = useAirports();
     var worldAtlas = useWorldAtlas();
 
-    var routesRef = React.useRef();
+    var inputRef = React.useRef();
     var ref = React.useState([]);
-    var routes = ref[0];
-    var setRoutes = ref[1];
+    var coordinates = ref[0];
+    var setCoordinates = ref[1];
     var ref$1 = React.useState('-');
     var emissions = ref$1[0];
     var setEmissions = ref$1[1];
 
     var handleSubmit = React.useCallback(function (_) {
-      var totalKm = routesRef.current.value.split('\n').map(function (route) {
-        var ref = route.split('-');
-        var src = ref[0];
-        var dst = ref[1];
-        var dist = d3.geoDistance(airports[src], airports[dst]) * earthRadius;
-        return dist;
-      }).reduce(function (total, curr) { return total + curr; });
-      setEmissions(totalKm * emissionsPerKm);
+      var coords = [];
 
-      setRoutes(routesRef.current.value.split('\n').map(function (route) {
+      var totalKm = inputRef.current.value.split('\n').map(function (route) {
         var ref = route.split('-');
         var src = ref[0];
         var dst = ref[1];
-        return [airports[src], airports[dst]];
-      }));
+        coords.push([airports[src], airports[dst]]);
+        return d3.geoDistance(airports[src], airports[dst]) * earthRadius;
+      }).reduce(function (total, curr) { return total + curr; });
+
+      setEmissions(totalKm * emissionsPerKm);
+      setCoordinates(coords);
     });
 
     if (!airports || !worldAtlas) {
@@ -107,7 +104,7 @@
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
         React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
-          React__default['default'].createElement( 'textarea', { ref: routesRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
+          React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK' }), React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
           React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
         ),
@@ -119,7 +116,7 @@
               React__default['default'].createElement( 'path', { className: "land", d: path(feature) })
             ); }),
             React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),
-            routes.map(function (ref) {
+            coordinates.map(function (ref) {
               var src = ref[0];
               var dst = ref[1];
 
@@ -137,7 +134,7 @@
               );
             }),
             React__default['default'].createElement( 'path', {
-              className: "route", d: path({ type: "MultiLineString", coordinates: routes }) })
+              className: "route", d: path({ type: "MultiLineString", coordinates: coordinates }) })
           )
         )
       )

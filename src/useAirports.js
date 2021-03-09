@@ -10,7 +10,7 @@ const parseRow = (row) => ({
   longitude: +row[7],
 });
 
-export const useData = () => {
+export const useAirports = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
