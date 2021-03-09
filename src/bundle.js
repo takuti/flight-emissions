@@ -60,6 +60,8 @@
   var width = 1024;
   var height = 512;
 
+  var routeRegex = /^[A-Z]{3}-[A-Z]{3}$/;
+
   var earthRadius = 6371;
 
   // https://www.bbc.com/news/science-environment-49349566
@@ -84,8 +86,9 @@
 
     var handleSubmit = React.useCallback(function (_) {
       var coords = [];
-
       var totalKm = inputRef.current.value.split('\n').map(function (route) {
+        if (!route.match(routeRegex)) { return 0; }
+
         var ref = route.split('-');
         var src = ref[0];
         var dst = ref[1];
