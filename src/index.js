@@ -93,6 +93,7 @@ const App = () => {
         <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK' rows={10} /><br />
         <button onClick={handleSubmit}>Calculate CO2 Emissions</button>
         <p>Total CO2 emissions: {emissions} tonnes</p>
+        <p>Global average of yearly emissions per capita: {rowByNumericCode.get(undefined).emissions} tonnes</p>
       </div>
       <svg width={width} height={height}>
         <g className="marks">
