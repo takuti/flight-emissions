@@ -79,9 +79,12 @@
     var ref = React.useState([]);
     var coordinates = ref[0];
     var setCoordinates = ref[1];
-    var ref$1 = React.useState('-');
+    var ref$1 = React.useState(0);
     var emissions = ref$1[0];
     var setEmissions = ref$1[1];
+    var ref$2 = React.useState('#d8d8d8');
+    var landColor = ref$2[0];
+    var setLandColor = ref$2[1];
 
     var handleSubmit = React.useCallback(function (_) {
       var coords = [];
@@ -95,8 +98,13 @@
         return d3.geoDistance(airports[src], airports[dst]) * earthRadius;
       }).reduce(function (total, curr) { return total + curr; });
 
-      setEmissions(totalKm * emissionsPerKm / 1000000);
+      var emissions = totalKm * emissionsPerKm / 1000000;
+      setEmissions(emissions);
       setCoordinates(coords);
+
+      // In 2017, global average of CO2 emissions was 4.8 tonnes per person.
+      // https://ourworldindata.org/per-capita-co2
+      setLandColor(emissions === 0 ? '#d8d8d8' : d3.interpolateReds(emissions / 4.8));
     });
 
     if (!airports || !worldAtlas) {
@@ -114,7 +122,7 @@
           React__default['default'].createElement( 'g', { className: "marks" },
             React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
             worldAtlas.land.features.map(function (feature) { return (
-              React__default['default'].createElement( 'path', { className: "land", d: path(feature) })
+              React__default['default'].createElement( 'path', { className: "land", d: path(feature), fill: landColor })
             ); }),
             React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),
             coordinates.map(function (ref) {

@@ -4,6 +4,7 @@ import {
   geoEquirectangular,
   geoPath,
   geoDistance,
+  interpolateReds,
 } from 'd3';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
@@ -28,7 +29,8 @@ const App = () => {
 
   const inputRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
-  const [emissions, setEmissions] = useState('-');
+  const [emissions, setEmissions] = useState(0);
+  const [landColor, setLandColor] = useState('#d8d8d8');
 
   const handleSubmit = useCallback(_ => {
     const coords = [];
@@ -40,8 +42,13 @@ const App = () => {
       return geoDistance(airports[src], airports[dst]) * earthRadius;
     }).reduce((total, curr) => total + curr);
 
-    setEmissions(totalKm * emissionsPerKm / 1000000);
+    const emissions = totalKm * emissionsPerKm / 1000000;
+    setEmissions(emissions);
     setCoordinates(coords);
+
+    // In 2017, global average of CO2 emissions was 4.8 tonnes per person.
+    // https://ourworldindata.org/per-capita-co2
+    setLandColor(emissions === 0 ? '#d8d8d8' : interpolateReds(emissions / 4.8));
   });
 
   if (!airports || !worldAtlas) {
@@ -60,7 +67,7 @@ const App = () => {
         <g className="marks">
           <path className="sphere" d={path({ type: 'Sphere' })} />
           {worldAtlas.land.features.map((feature) => (
-            <path className="land" d={path(feature)} />
+            <path className="land" d={path(feature)} fill={landColor} />
           ))}
           <path className="interiors" d={path(worldAtlas.interiors)} />
           {coordinates.map(([src, dst]) => {

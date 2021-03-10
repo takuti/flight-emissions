@@ -4,16 +4,12 @@ body {
 }
 
 .marks .sphere {
-  fill: #ececec;
-}
-
-.marks .land {
-  fill: #d8d8d8;
+  fill: #fff;
 }
 
 .marks .interiors {
   fill: none;
-  stroke: #d9dfe0;
+  stroke: #fff;
 }
 
 .marks circle {
