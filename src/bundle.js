@@ -96,7 +96,7 @@
         return d3.geoDistance(airports[src], airports[dst]) * earthRadius;
       }).reduce(function (total, curr) { return total + curr; });
 
-      setEmissions(totalKm * emissionsPerKm);
+      setEmissions(totalKm * emissionsPerKm / 1000000);
       setCoordinates(coords);
     });
 
@@ -109,7 +109,7 @@
         React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK', rows: 10 }), React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
-          React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, "g" )
+          React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, " tonnes" )
         ),
         React__default['default'].createElement( 'svg', { width: width, height: height },
           React__default['default'].createElement( 'g', { className: "marks" },

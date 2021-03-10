@@ -42,7 +42,7 @@ const App = () => {
       return geoDistance(airports[src], airports[dst]) * earthRadius;
     }).reduce((total, curr) => total + curr);
 
-    setEmissions(totalKm * emissionsPerKm);
+    setEmissions(totalKm * emissionsPerKm / 1000000);
     setCoordinates(coords);
   });
 
@@ -56,7 +56,7 @@ const App = () => {
         Enter routes among airpots in IATA 3-letter code:<br />
         <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK' rows={10} /><br />
         <button onClick={handleSubmit}>Calculate CO2 Emissions</button>
-        <p>Total CO2 emissions: {emissions}g</p>
+        <p>Total CO2 emissions: {emissions} tonnes</p>
       </div>
       <svg width={width} height={height}>
         <g className="marks">
