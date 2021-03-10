@@ -4,7 +4,7 @@ import {
   geoEquirectangular,
   geoPath,
   geoDistance,
-  interpolateReds,
+  interpolateOrRd,
 } from 'd3';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
@@ -48,7 +48,7 @@ const App = () => {
 
     // In 2017, global average of CO2 emissions was 4.8 tonnes per person.
     // https://ourworldindata.org/per-capita-co2
-    setLandColor(emissions === 0 ? '#d8d8d8' : interpolateReds(emissions / 4.8));
+    setLandColor(emissions === 0 ? '#d8d8d8' : interpolateOrRd(emissions / 4.8));
   });
 
   if (!airports || !worldAtlas) {
