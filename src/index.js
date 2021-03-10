@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { 
   geoEquirectangular,
   geoPath,
-  geoGraticule,
   geoDistance,
 } from 'd3';
 import { useAirports } from './useAirports';
@@ -20,7 +19,6 @@ const earthRadius = 6371;
 // 133g/km for domestic flight, 102g/km for long haul flight
 const emissionsPerKm = (133 + 102) / 2;
 
-const graticule = geoGraticule();
 const projection = geoEquirectangular();
 const path = geoPath(projection);
 
@@ -61,7 +59,6 @@ const App = () => {
       <svg width={width} height={height}>
         <g className="marks">
           <path className="sphere" d={path({ type: 'Sphere' })} />
-          <path className="graticule" d={path(graticule())} />
           {worldAtlas.land.features.map((feature) => (
             <path className="land" d={path(feature)} />
           ))}

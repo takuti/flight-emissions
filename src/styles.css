@@ -16,11 +16,6 @@ body {
   stroke: #d9dfe0;
 }
 
-.marks .graticule {
-  fill: none;
-  stroke: #dadada;
-}
-
 .marks circle {
 	fill: #137b80;
   opacity: 0.3;

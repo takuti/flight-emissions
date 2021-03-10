@@ -68,7 +68,6 @@
   // 133g/km for domestic flight, 102g/km for long haul flight
   var emissionsPerKm = (133 + 102) / 2;
 
-  var graticule = d3.geoGraticule();
   var projection = d3.geoEquirectangular();
   var path = d3.geoPath(projection);
 
@@ -114,7 +113,6 @@
         React__default['default'].createElement( 'svg', { width: width, height: height },
           React__default['default'].createElement( 'g', { className: "marks" },
             React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
-            React__default['default'].createElement( 'path', { className: "graticule", d: path(graticule()) }),
             worldAtlas.land.features.map(function (feature) { return (
               React__default['default'].createElement( 'path', { className: "land", d: path(feature) })
             ); }),
