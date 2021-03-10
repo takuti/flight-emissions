@@ -49,11 +49,49 @@
         var land = ref.land;
       	setData({
           land: topojson.feature(topology, land),
+          countries: topojson.feature(topology, countries),
           interiors: topojson.mesh(topology, countries, function (a, b) { return a !== b; })
         });
       });
     }, []);
     
+    return data;
+  };
+
+  var csvUrl$1 =
+    'https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.csv';
+
+  var useCountryCodes = function () {
+    var ref = React.useState(null);
+    var data = ref[0];
+    var setData = ref[1];
+
+    React.useEffect(function () {
+      d3.csv(csvUrl$1).then(setData);
+    }, []);
+
+    return data;
+  };
+
+  var csvUrl =
+    'https://gist.githubusercontent.com/takuti/5f236dd5847c30de0936c598dbcbe9b2/raw/dd2d56ccf2a2ad6a7958ef4cedfc6790a8111076/co2_emissions_per_capita.csv';
+
+  var row = function (d) {
+    d.emissions = +d[
+      'Per capita CO2 emissions'
+    ];
+    return d;
+  };
+
+  var useData = function () {
+    var ref = React.useState(null);
+    var data = ref[0];
+    var setData = ref[1];
+
+    React.useEffect(function () {
+      d3.csv(csvUrl, row).then(setData);
+    }, []);
+
     return data;
   };
 
@@ -71,9 +109,14 @@
   var projection = d3.geoEquirectangular();
   var path = d3.geoPath(projection);
 
+  var selectedYear = '2019';
+  var missingDataColor = '#d8d8d8';
+
   var App = function () {
     var airports = useAirports();
     var worldAtlas = useWorldAtlas();
+    var countryCodes = useCountryCodes();
+    var data = useData();
 
     var inputRef = React.useRef();
     var ref = React.useState([]);
@@ -82,9 +125,6 @@
     var ref$1 = React.useState(0);
     var emissions = ref$1[0];
     var setEmissions = ref$1[1];
-    var ref$2 = React.useState('#d8d8d8');
-    var landColor = ref$2[0];
-    var setLandColor = ref$2[1];
 
     var handleSubmit = React.useCallback(function (_) {
       var coords = [];
@@ -101,15 +141,38 @@
       var emissions = totalKm * emissionsPerKm / 1000000;
       setEmissions(emissions);
       setCoordinates(coords);
-
-      // In 2017, global average of CO2 emissions was 4.8 tonnes per person.
-      // https://ourworldindata.org/per-capita-co2
-      setLandColor(emissions === 0 ? '#d8d8d8' : d3.interpolateOrRd(emissions / 4.8));
     });
 
-    if (!airports || !worldAtlas) {
+    if (!airports || !worldAtlas || !countryCodes || !data) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
+
+    var numericCodeByAlpha3Code = new Map();
+    countryCodes.forEach(function (code) {
+      numericCodeByAlpha3Code.set(
+        code['alpha-3'],
+        code['country-code']
+      );
+    });
+
+    var filteredData = data.filter(
+      function (d) { return d.Year === selectedYear; }
+    );
+
+    var rowByNumericCode = new Map();
+    filteredData.forEach(function (d) {
+      var alpha3Code = d.Code;
+      var numericCode = numericCodeByAlpha3Code.get(
+        alpha3Code
+      );
+      rowByNumericCode.set(numericCode, d);
+    });
+
+    var colorValue = function (d) { return d.emissions; };
+
+    var colorScale = d3.scaleSequential(
+      d3.interpolateOrRd
+    ).domain([0, d3.max(filteredData, colorValue)]);
 
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
@@ -121,9 +184,15 @@
         React__default['default'].createElement( 'svg', { width: width, height: height },
           React__default['default'].createElement( 'g', { className: "marks" },
             React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
-            worldAtlas.land.features.map(function (feature) { return (
-              React__default['default'].createElement( 'path', { className: "land", d: path(feature), fill: landColor })
-            ); }),
+            worldAtlas.countries.features.map(function (feature) {
+              var d = rowByNumericCode.get(feature.id);
+              return (
+                React__default['default'].createElement( 'path', {
+                  className: "countries", fill: (d && d.emissions < emissions) 
+                      ? colorScale(colorValue(d)) 
+                      : missingDataColor, d: path(feature) })
+              );
+            }),
             React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),
             coordinates.map(function (ref) {
               var src = ref[0];

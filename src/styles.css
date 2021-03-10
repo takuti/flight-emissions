@@ -9,7 +9,11 @@ body {
 
 .marks .interiors {
   fill: none;
-  stroke: #fff;
+}
+
+.marks .countries {
+  stroke-width: .3px;
+  stroke: rgb(32, 32, 32);
 }
 
 .marks circle {

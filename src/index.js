@@ -1,13 +1,17 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { 
   geoEquirectangular,
   geoPath,
   geoDistance,
   interpolateOrRd,
+  scaleSequential,
+  max,
 } from 'd3';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
+import { useCountryCodes } from './useCountryCodes';
+import { useData } from './useData';
 
 const width = 1024;
 const height = 512;
@@ -23,14 +27,18 @@ const emissionsPerKm = (133 + 102) / 2;
 const projection = geoEquirectangular();
 const path = geoPath(projection);
 
+const selectedYear = '2019';
+const missingDataColor = '#d8d8d8';
+
 const App = () => {
   const airports = useAirports();
   const worldAtlas = useWorldAtlas();
+  const countryCodes = useCountryCodes();
+  const data = useData();
 
   const inputRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
   const [emissions, setEmissions] = useState(0);
-  const [landColor, setLandColor] = useState('#d8d8d8');
 
   const handleSubmit = useCallback(_ => {
     const coords = [];
@@ -45,15 +53,38 @@ const App = () => {
     const emissions = totalKm * emissionsPerKm / 1000000;
     setEmissions(emissions);
     setCoordinates(coords);
-
-    // In 2017, global average of CO2 emissions was 4.8 tonnes per person.
-    // https://ourworldindata.org/per-capita-co2
-    setLandColor(emissions === 0 ? '#d8d8d8' : interpolateOrRd(emissions / 4.8));
   });
 
-  if (!airports || !worldAtlas) {
+  if (!airports || !worldAtlas || !countryCodes || !data) {
     return <pre>Loading...</pre>;
   }
+
+  const numericCodeByAlpha3Code = new Map();
+  countryCodes.forEach((code) => {
+    numericCodeByAlpha3Code.set(
+      code['alpha-3'],
+      code['country-code']
+    );
+  });
+
+  const filteredData = data.filter(
+    (d) => d.Year === selectedYear
+  );
+
+  const rowByNumericCode = new Map();
+  filteredData.forEach((d) => {
+    const alpha3Code = d.Code;
+    const numericCode = numericCodeByAlpha3Code.get(
+      alpha3Code
+    );
+    rowByNumericCode.set(numericCode, d);
+  });
+
+  const colorValue = (d) => d.emissions;
+
+  const colorScale = scaleSequential(
+    interpolateOrRd
+  ).domain([0, max(filteredData, colorValue)]);
 
   return (
     <>
@@ -66,9 +97,20 @@ const App = () => {
       <svg width={width} height={height}>
         <g className="marks">
           <path className="sphere" d={path({ type: 'Sphere' })} />
-          {worldAtlas.land.features.map((feature) => (
-            <path className="land" d={path(feature)} fill={landColor} />
-          ))}
+          {worldAtlas.countries.features.map((feature) => {
+            const d = rowByNumericCode.get(feature.id);
+            return (
+              <path
+                className="countries"
+                fill={
+                  (d && d.emissions < emissions) 
+                    ? colorScale(colorValue(d)) 
+                    : missingDataColor
+                }
+                d={path(feature)}
+              />
+            );
+          })}
           <path className="interiors" d={path(worldAtlas.interiors)} />
           {coordinates.map(([src, dst]) => {
             const [x1, y1] = projection(src);
