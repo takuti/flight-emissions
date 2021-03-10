@@ -1,12 +1,11 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { 
-  geoOrthographic,
+  geoEquirectangular,
   geoPath,
   geoGraticule,
   geoDistance,
 } from 'd3';
-import { timer } from 'd3-timer';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
 
@@ -22,8 +21,8 @@ const earthRadius = 6371;
 const emissionsPerKm = (133 + 102) / 2;
 
 const graticule = geoGraticule();
-const rotateSpeed = 1e-2;
-const startDate = Date.now();
+const projection = geoEquirectangular();
+const path = geoPath(projection);
 
 const App = () => {
   const airports = useAirports();
@@ -47,22 +46,9 @@ const App = () => {
     setCoordinates(coords);
   });
 
-  const [angles, setAngles] = useState([0, 0]);
-  useEffect(() => {
-    const timerLoop = timer((_) => {
-      const lambda = rotateSpeed * (Date.now() - startDate);
-      const phi = -15;
-      setAngles([lambda + 180, -phi]);
-    });
-    return () => timerLoop.stop();
-  }, []);
-
   if (!airports || !worldAtlas) {
     return <pre>Loading...</pre>;
   }
-
-  const projection = geoOrthographic().rotate(angles);
-  const path = geoPath(projection);
 
   return (
     <>
