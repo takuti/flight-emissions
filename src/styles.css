@@ -16,6 +16,10 @@ body {
   stroke: rgb(32, 32, 32);
 }
 
+.marks .countries:hover {
+  opacity: 0.8;
+}
+
 .marks circle {
 	fill: #137b80;
   opacity: 0.3;
