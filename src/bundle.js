@@ -191,7 +191,15 @@
                 React__default['default'].createElement( 'path', {
                   className: "countries", fill: (d && d.emissions < emissions) 
                       ? colorScale(colorValue(d)) 
-                      : missingDataColor, d: path(feature) })
+                      : missingDataColor, onMouseEnter: function (e) { return d3.select(e.target).attr(
+                      "fill",
+                      d ? colorScale(colorValue(d)) : missingDataColor
+                    ); }, onMouseLeave: function (e) { return d3.select(e.target).attr(
+                      "fill",
+                      (d && d.emissions < emissions) 
+                        ? colorScale(colorValue(d))
+                        : missingDataColor
+                    ); }, d: path(feature) })
               );
             }),
             React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),

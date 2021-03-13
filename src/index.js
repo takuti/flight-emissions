@@ -7,6 +7,7 @@ import {
   interpolateOrRd,
   scaleSequential,
   max,
+  select
 } from 'd3';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
@@ -107,6 +108,20 @@ const App = () => {
                   (d && d.emissions < emissions) 
                     ? colorScale(colorValue(d)) 
                     : missingDataColor
+                }
+                onMouseEnter={(e) => 
+                  select(e.target).attr(
+                    "fill",
+                    d ? colorScale(colorValue(d)) : missingDataColor
+                  )
+                }
+                onMouseLeave={(e) => 
+                  select(e.target).attr(
+                    "fill",
+                    (d && d.emissions < emissions) 
+                      ? colorScale(colorValue(d))
+                      : missingDataColor
+                  )
                 }
                 d={path(feature)}
               />
