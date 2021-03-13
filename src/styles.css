@@ -1,6 +1,5 @@
 body {
   font-family: 'Poppins', sans-serif;
-  margin: 0;
 }
 
 .marks .sphere {
@@ -21,13 +20,13 @@ body {
 }
 
 .marks circle {
-	fill: #137b80;
-  opacity: 0.3;
+	fill: red;
+  opacity: 0.5;
 }
 
 .marks .route {
-  stroke: #137b80;
-  stroke-width: 2px;
-  opacity: 0.3;
+  stroke: red;
+  stroke-width: 1px;
+  opacity: 0.5;
   fill: none;
 }

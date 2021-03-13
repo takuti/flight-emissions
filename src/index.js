@@ -31,6 +31,8 @@ const path = geoPath(projection);
 const selectedYear = '2019';
 const missingDataColor = '#d8d8d8';
 
+const round = (n, d) => Math.round(n * Math.pow(10, d)) / Math.pow(10, d);
+
 const App = () => {
   const airports = useAirports();
   const worldAtlas = useWorldAtlas();
@@ -89,13 +91,6 @@ const App = () => {
 
   return (
     <>
-      <div>
-        Enter routes among airpots in IATA 3-letter code:<br />
-        <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK' rows={10} /><br />
-        <button onClick={handleSubmit}>Calculate CO2 Emissions</button>
-        <p>Total CO2 emissions: {emissions} tonnes</p>
-        <p>Global average of yearly emissions per capita: {rowByNumericCode.get(undefined).emissions} tonnes</p>
-      </div>
       <svg width={width} height={height}>
         <g className="marks">
           <path className="sphere" d={path({ type: 'Sphere' })} />
@@ -126,7 +121,7 @@ const App = () => {
                 d={path(feature)}
               >
                 <title>
-                  {feature.properties.name}: {d ? d.emissions + ' tonnes' : 'n/a'}
+                  {feature.properties.name}: {d ? round(d.emissions, 3) + ' tonnes/capita' : 'n/a'}
                 </title>
               </path>
             );
@@ -137,8 +132,8 @@ const App = () => {
             const [x2, y2] = projection(dst);
             return (
               <>
-                <circle cx={x1} cy={y1} r={4} />
-                <circle cx={x2} cy={y2} r={4} />
+                <circle cx={x1} cy={y1} r={3} />
+                <circle cx={x2} cy={y2} r={3} />
               </>
             );
           })}
@@ -147,7 +142,16 @@ const App = () => {
             d={path({ type: "MultiLineString", coordinates: coordinates })}
           />
         </g>
+        <text x="10" y={height - 10} font-size="small">* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions.</text>
       </svg>
+      <div>
+        Enter routes among airpots in IATA 3-letter code: <button onClick={handleSubmit}>Calculate total CO2 emissions</button><br />
+        <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK\nJFK-NRT' rows={10} />
+        <ul>
+          <li>Total CO2 emissions from your flights: <b>{round(emissions, 3)} tonnes</b></li>
+          <li>Global average of yearly emissions per capita in {selectedYear}: <b>{round(rowByNumericCode.get(undefined).emissions, 3)} tonnes</b> [<a href="https://ourworldindata.org/per-capita-co2" target="_blank">source</a>]</li>
+        </ul>
+      </div>
     </>
   );
 };

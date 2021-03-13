@@ -112,6 +112,8 @@
   var selectedYear = '2019';
   var missingDataColor = '#d8d8d8';
 
+  var round = function (n, d) { return Math.round(n * Math.pow(10, d)) / Math.pow(10, d); };
+
   var App = function () {
     var airports = useAirports();
     var worldAtlas = useWorldAtlas();
@@ -176,12 +178,6 @@
 
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
-        React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code:", React__default['default'].createElement( 'br', null ),
-          React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK', rows: 10 }), React__default['default'].createElement( 'br', null ),
-          React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate CO2 Emissions"),
-          React__default['default'].createElement( 'p', null, "Total CO2 emissions: ", emissions, " tonnes" ),
-          React__default['default'].createElement( 'p', null, "Global average of yearly emissions per capita: ", rowByNumericCode.get(undefined).emissions, " tonnes" )
-        ),
         React__default['default'].createElement( 'svg', { width: width, height: height },
           React__default['default'].createElement( 'g', { className: "marks" },
             React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
@@ -201,7 +197,7 @@
                         : missingDataColor
                     ); }, d: path(feature) },
                   React__default['default'].createElement( 'title', null,
-                    feature.properties.name, ": ", d ? d.emissions + ' tonnes' : 'n/a'
+                    feature.properties.name, ": ", d ? round(d.emissions, 3) + ' tonnes/capita' : 'n/a'
                   )
                 )
               );
@@ -219,13 +215,21 @@
               var y2 = ref$2[1];
               return (
                 React__default['default'].createElement( React__default['default'].Fragment, null,
-                  React__default['default'].createElement( 'circle', { cx: x1, cy: y1, r: 4 }),
-                  React__default['default'].createElement( 'circle', { cx: x2, cy: y2, r: 4 })
+                  React__default['default'].createElement( 'circle', { cx: x1, cy: y1, r: 3 }),
+                  React__default['default'].createElement( 'circle', { cx: x2, cy: y2, r: 3 })
                 )
               );
             }),
             React__default['default'].createElement( 'path', {
               className: "route", d: path({ type: "MultiLineString", coordinates: coordinates }) })
+          ),
+          React__default['default'].createElement( 'text', { x: "10", y: height - 10, 'font-size': "small" }, "* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions.")
+        ),
+        React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code: ", React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React__default['default'].createElement( 'br', null ),
+          React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 }),
+          React__default['default'].createElement( 'ul', null,
+            React__default['default'].createElement( 'li', null, "Total CO2 emissions from your flights: ", React__default['default'].createElement( 'b', null, round(emissions, 3), " tonnes" ) ),
+            React__default['default'].createElement( 'li', null, "Global average of yearly emissions per capita in ", selectedYear, ": ", React__default['default'].createElement( 'b', null, round(rowByNumericCode.get(undefined).emissions, 3), " tonnes" ), " [", React__default['default'].createElement( 'a', { href: "https://ourworldindata.org/per-capita-co2", target: "_blank" }, "source"), "]" )
           )
         )
       )
