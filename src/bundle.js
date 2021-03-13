@@ -199,7 +199,11 @@
                       (d && d.emissions < emissions) 
                         ? colorScale(colorValue(d))
                         : missingDataColor
-                    ); }, d: path(feature) })
+                    ); }, d: path(feature) },
+                  React__default['default'].createElement( 'title', null,
+                    feature.properties.name, ": ", d ? d.emissions + ' tonnes' : 'n/a'
+                  )
+                )
               );
             }),
             React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),

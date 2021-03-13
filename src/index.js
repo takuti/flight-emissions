@@ -124,7 +124,11 @@ const App = () => {
                   )
                 }
                 d={path(feature)}
-              />
+              >
+                <title>
+                  {feature.properties.name}: {d ? d.emissions + ' tonnes' : 'n/a'}
+                </title>
+              </path>
             );
           })}
           <path className="interiors" d={path(worldAtlas.interiors)} />
