@@ -191,9 +191,6 @@
   );
   };
 
-  var width = 1024;
-  var height = 512;
-
   var routeRegex = /^[A-Z]{3}-[A-Z]{3}$/;
 
   var earthRadius = 6371;
@@ -202,21 +199,11 @@
   // 133g/km for domestic flight, 102g/km for long haul flight
   var emissionsPerKm = (133 + 102) / 2;
 
-  var selectedYear = '2019';
-
-  var App = function () {
-    var airports = useAirports();
-    var worldAtlas = useWorldAtlas();
-    var countryCodes = useCountryCodes();
-    var data = useData();
-
-    var inputRef = React$1.useRef();
-    var ref = React$1.useState([]);
-    var coordinates = ref[0];
-    var setCoordinates = ref[1];
-    var ref$1 = React$1.useState(0);
-    var emissions = ref$1[0];
-    var setEmissions = ref$1[1];
+  var FlightRoutesInputForm = function (ref) {
+    var airports = ref.airports;
+    var inputRef = ref.inputRef;
+    var setEmissions = ref.setEmissions;
+    var setCoordinates = ref.setCoordinates;
 
     var handleSubmit = React$1.useCallback(function (_) {
       var coords = [];
@@ -234,6 +221,32 @@
       setEmissions(emissions);
       setCoordinates(coords);
     });
+
+    return (
+      React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React.createElement( 'br', null ),
+        React.createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 })
+      )
+    );
+  };
+
+  var width = 1024;
+  var height = 512;
+
+  var selectedYear = '2019';
+
+  var App = function () {
+    var airports = useAirports();
+    var worldAtlas = useWorldAtlas();
+    var countryCodes = useCountryCodes();
+    var data = useData();
+
+    var inputRef = React$1.useRef();
+    var ref = React$1.useState([]);
+    var coordinates = ref[0];
+    var setCoordinates = ref[1];
+    var ref$1 = React$1.useState(0);
+    var emissions = ref$1[0];
+    var setEmissions = ref$1[1];
 
     if (!airports || !worldAtlas || !countryCodes || !data) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
@@ -273,8 +286,9 @@
             worldAtlas: worldAtlas, rowByNumericCode: rowByNumericCode, colorValue: colorValue, colorScale: colorScale, emissions: emissions, coordinates: coordinates }),
           React__default['default'].createElement( 'text', { x: "10", y: height - 10, 'font-size': "small" }, "* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions in ", selectedYear, ".")
         ),
-        React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code: ", React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React__default['default'].createElement( 'br', null ),
-          React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 }),
+        React__default['default'].createElement( 'div', null,
+          React__default['default'].createElement( FlightRoutesInputForm, { 
+            airports: airports, inputRef: inputRef, setEmissions: setEmissions, setCoordinates: setCoordinates }),
           React__default['default'].createElement( 'ul', null,
             React__default['default'].createElement( 'li', null, "Total CO2 emissions from your flights: ", React__default['default'].createElement( 'b', null, round(emissions, 3), " tonnes" ) ),
             React__default['default'].createElement( 'li', null, "Global average of yearly emissions per capita in ", selectedYear, ": ", React__default['default'].createElement( 'b', null, round(rowByNumericCode.get(undefined).emissions, 3), " tonnes" ), " [", React__default['default'].createElement( 'a', { href: "https://ourworldindata.org/per-capita-co2", target: "_blank" }, "source"), "]" )
