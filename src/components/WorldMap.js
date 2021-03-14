@@ -1,5 +1,5 @@
 import { select } from 'd3';
-import { round } from './utils';
+import { round } from '../utils';
 
 const missingDataColor = '#d8d8d8';
 

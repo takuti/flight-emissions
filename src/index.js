@@ -6,12 +6,12 @@ import {
   max,
 } from 'd3';
 import { round } from './utils';
-import { useAirports } from './useAirports';
-import { useWorldAtlas } from './useWorldAtlas';
-import { useCountryCodes } from './useCountryCodes';
-import { usePerCapitaEmissions } from './usePerCapitaEmissions';
-import { FlightMap } from './FlightMap';
-import { FlightRoutesInputForm } from './FlightRoutesInputForm';
+import { useAirports } from './data/useAirports';
+import { useWorldAtlas } from './data/useWorldAtlas';
+import { useCountryCodes } from './data/useCountryCodes';
+import { usePerCapitaEmissions } from './data/usePerCapitaEmissions';
+import { FlightMap } from './components/FlightMap';
+import { FlightRoutesInputForm } from './components/FlightRoutesInputForm';
 
 const width = 1024;
 const height = 512;
