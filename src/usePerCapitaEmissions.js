@@ -11,7 +11,7 @@ const row = (d) => {
   return d;
 };
 
-export const useData = () => {
+export const usePerCapitaEmissions = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {

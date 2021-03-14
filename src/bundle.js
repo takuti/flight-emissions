@@ -87,7 +87,7 @@
     return d;
   };
 
-  var useData = function () {
+  var usePerCapitaEmissions = function () {
     var ref = React$1.useState(null);
     var data = ref[0];
     var setData = ref[1];
@@ -238,7 +238,7 @@
     var airports = useAirports();
     var worldAtlas = useWorldAtlas();
     var countryCodes = useCountryCodes();
-    var data = useData();
+    var perCapitaEmissions = usePerCapitaEmissions();
 
     var inputRef = React$1.useRef();
     var ref = React$1.useState([]);
@@ -248,7 +248,7 @@
     var emissions = ref$1[0];
     var setEmissions = ref$1[1];
 
-    if (!airports || !worldAtlas || !countryCodes || !data) {
+    if (!airports || !worldAtlas || !countryCodes || !perCapitaEmissions) {
       return React__default['default'].createElement( 'pre', null, "Loading..." );
     }
 
@@ -260,7 +260,7 @@
       );
     });
 
-    var filteredData = data.filter(
+    var filteredData = perCapitaEmissions.filter(
       function (d) { return d.Year === selectedYear; }
     );
 

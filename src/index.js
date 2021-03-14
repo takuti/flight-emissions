@@ -9,7 +9,7 @@ import { round } from './utils';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
 import { useCountryCodes } from './useCountryCodes';
-import { useData } from './useData';
+import { usePerCapitaEmissions } from './usePerCapitaEmissions';
 import { FlightMap } from './FlightMap';
 import { FlightRoutesInputForm } from './FlightRoutesInputForm';
 
@@ -22,13 +22,13 @@ const App = () => {
   const airports = useAirports();
   const worldAtlas = useWorldAtlas();
   const countryCodes = useCountryCodes();
-  const data = useData();
+  const perCapitaEmissions = usePerCapitaEmissions();
 
   const inputRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
   const [emissions, setEmissions] = useState(0);
 
-  if (!airports || !worldAtlas || !countryCodes || !data) {
+  if (!airports || !worldAtlas || !countryCodes || !perCapitaEmissions) {
     return <pre>Loading...</pre>;
   }
 
@@ -40,7 +40,7 @@ const App = () => {
     );
   });
 
-  const filteredData = data.filter(
+  const filteredData = perCapitaEmissions.filter(
     (d) => d.Year === selectedYear
   );
 
