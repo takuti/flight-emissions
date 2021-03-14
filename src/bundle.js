@@ -205,28 +205,28 @@
     var setEmissions = ref.setEmissions;
     var setCoordinates = ref.setCoordinates;
 
-    var handleSubmit = React$1.useCallback(function (_) {
-      var coords = [];
-      var totalKm = inputRef.current.value.split('\n').map(function (route) {
-        if (!route.match(routeRegex)) { return 0; }
-
-        var ref = route.split('-');
-        var src = ref[0];
-        var dst = ref[1];
-        coords.push([airports[src], airports[dst]]);
-        return d3.geoDistance(airports[src], airports[dst]) * earthRadius;
-      }).reduce(function (total, curr) { return total + curr; });
-
-      var emissions = totalKm * emissionsPerKm / 1000000;
-      setEmissions(emissions);
-      setCoordinates(coords);
-    });
-
     return (
-      React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React.createElement( 'br', null ),
-        React.createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 })
-      )
-    );
+    React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'button', { onClick: function () {
+        var coords = [];
+        var totalKm = inputRef.current.value.split('\n').map(function (route) {
+          if (!route.match(routeRegex)) { return 0; }
+
+          var ref = route.split('-');
+          var src = ref[0];
+          var dst = ref[1];
+          coords.push([airports[src], airports[dst]]);
+          return d3.geoDistance(airports[src], airports[dst]) * earthRadius;
+        }).reduce(function (total, curr) { return total + curr; });
+
+        var emissions = totalKm * emissionsPerKm / 1000000;
+        setEmissions(emissions);
+        setCoordinates(coords);
+      } }, "Calculate total CO2 emissions"),
+      React.createElement( 'br', null ),
+      React.createElement( 'textarea', {
+        ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 })
+    )
+  );
   };
 
   var width = 1024;

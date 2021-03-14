@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { geoDistance } from 'd3';
 
 const routeRegex = /^[A-Z]{3}-[A-Z]{3}$/;
@@ -14,26 +13,30 @@ export const FlightRoutesInputForm = ({
   inputRef,
   setEmissions,
   setCoordinates,
-}) => {
-  const handleSubmit = useCallback(_ => {
-    const coords = [];
-    const totalKm = inputRef.current.value.split('\n').map((route) => {
-      if (!route.match(routeRegex)) return 0;
+}) => (
+  <span>
+    Enter routes among airpots in IATA 3-letter code:
+    <button onClick={() => {
+      const coords = [];
+      const totalKm = inputRef.current.value.split('\n').map((route) => {
+        if (!route.match(routeRegex)) return 0;
 
-      const [src, dst] = route.split('-');
-      coords.push([airports[src], airports[dst]]);
-      return geoDistance(airports[src], airports[dst]) * earthRadius;
-    }).reduce((total, curr) => total + curr);
+        const [src, dst] = route.split('-');
+        coords.push([airports[src], airports[dst]]);
+        return geoDistance(airports[src], airports[dst]) * earthRadius;
+      }).reduce((total, curr) => total + curr);
 
-    const emissions = totalKm * emissionsPerKm / 1000000;
-    setEmissions(emissions);
-    setCoordinates(coords);
-  });
-
-  return (
-    <span>
-      Enter routes among airpots in IATA 3-letter code: <button onClick={handleSubmit}>Calculate total CO2 emissions</button><br />
-      <textarea ref={inputRef} placeholder='HND-SFO\nSFO-JFK\nJFK-NRT' rows={10} />
-    </span>
-  );
-};
+      const emissions = totalKm * emissionsPerKm / 1000000;
+      setEmissions(emissions);
+      setCoordinates(coords);
+    }}>
+      Calculate total CO2 emissions
+    </button>
+    <br />
+    <textarea
+      ref={inputRef} 
+      placeholder='HND-SFO\nSFO-JFK\nJFK-NRT' 
+      rows={10}
+    />
+  </span>
+);
