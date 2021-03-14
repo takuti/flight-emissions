@@ -1,18 +1,17 @@
 import React, { useCallback, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { 
-  geoEquirectangular,
-  geoPath,
   geoDistance,
   interpolateOrRd,
   scaleSequential,
   max,
-  select
 } from 'd3';
+import { round } from './utils';
 import { useAirports } from './useAirports';
 import { useWorldAtlas } from './useWorldAtlas';
 import { useCountryCodes } from './useCountryCodes';
 import { useData } from './useData';
+import { FlightMap } from './FlightMap';
 
 const width = 1024;
 const height = 512;
@@ -25,13 +24,7 @@ const earthRadius = 6371;
 // 133g/km for domestic flight, 102g/km for long haul flight
 const emissionsPerKm = (133 + 102) / 2;
 
-const projection = geoEquirectangular();
-const path = geoPath(projection);
-
 const selectedYear = '2019';
-const missingDataColor = '#d8d8d8';
-
-const round = (n, d) => Math.round(n * Math.pow(10, d)) / Math.pow(10, d);
 
 const App = () => {
   const airports = useAirports();
@@ -92,56 +85,14 @@ const App = () => {
   return (
     <>
       <svg width={width} height={height}>
-        <g className="marks">
-          <path className="sphere" d={path({ type: 'Sphere' })} />
-          {worldAtlas.countries.features.map((feature) => {
-            const d = rowByNumericCode.get(feature.id);
-            return (
-              <path
-                className="countries"
-                fill={
-                  (d && d.emissions < emissions) 
-                    ? colorScale(colorValue(d)) 
-                    : missingDataColor
-                }
-                onMouseEnter={(e) => 
-                  select(e.target).attr(
-                    "fill",
-                    d ? colorScale(colorValue(d)) : missingDataColor
-                  )
-                }
-                onMouseLeave={(e) => 
-                  select(e.target).attr(
-                    "fill",
-                    (d && d.emissions < emissions) 
-                      ? colorScale(colorValue(d))
-                      : missingDataColor
-                  )
-                }
-                d={path(feature)}
-              >
-                <title>
-                  {feature.properties.name}: {d ? round(d.emissions, 3) + ' tonnes/capita' : 'n/a'}
-                </title>
-              </path>
-            );
-          })}
-          <path className="interiors" d={path(worldAtlas.interiors)} />
-          {coordinates.map(([src, dst]) => {
-            const [x1, y1] = projection(src);
-            const [x2, y2] = projection(dst);
-            return (
-              <>
-                <circle cx={x1} cy={y1} r={3} />
-                <circle cx={x2} cy={y2} r={3} />
-              </>
-            );
-          })}
-          <path
-            className="route"
-            d={path({ type: "MultiLineString", coordinates: coordinates })}
-          />
-        </g>
+        <FlightMap 
+          worldAtlas={worldAtlas}
+          rowByNumericCode={rowByNumericCode}
+          colorValue={colorValue}
+          colorScale={colorScale}
+          emissions={emissions}
+          coordinates={coordinates}
+        />
         <text x="10" y={height - 10} font-size="small">* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions in {selectedYear}.</text>
       </svg>
       <div>

@@ -2,29 +2,29 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-.marks .sphere {
+.map .sphere {
   fill: #fff;
 }
 
-.marks .interiors {
+.map .interiors {
   fill: none;
 }
 
-.marks .countries {
+.map .countries {
   stroke-width: .3px;
   stroke: rgb(32, 32, 32);
 }
 
-.marks .countries:hover {
+.map .countries:hover {
   opacity: 0.8;
 }
 
-.marks circle {
+.routes circle {
 	fill: red;
   opacity: 0.5;
 }
 
-.marks .route {
+.routes path {
   stroke: red;
   stroke-width: 1px;
   opacity: 0.5;

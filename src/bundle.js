@@ -1,10 +1,14 @@
-(function (React, ReactDOM, d3, topojson) {
+(function (React$1, ReactDOM, d3, topojson) {
   'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-  var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
+  var React__default = /*#__PURE__*/_interopDefaultLegacy(React$1);
   var ReactDOM__default = /*#__PURE__*/_interopDefaultLegacy(ReactDOM);
+
+  var round = function (n, d) { return (
+    Math.round(n * Math.pow(10, d)) / Math.pow(10, d)
+  ); };
 
   var textUrl = 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat';
 
@@ -16,11 +20,11 @@
   }); };
 
   var useAirports = function () {
-    var ref = React.useState(null);
+    var ref = React$1.useState(null);
     var data = ref[0];
     var setData = ref[1];
 
-    React.useEffect(function () {
+    React$1.useEffect(function () {
       d3.text(textUrl).then(function (text) {
         var airports = {};
         d3.csvParseRows(text).map(function (row) {
@@ -38,11 +42,11 @@
   var jsonUrl = 'https://unpkg.com/world-atlas@2.0.2/countries-50m.json';
 
   var useWorldAtlas = function () {
-    var ref = React.useState(null);
+    var ref = React$1.useState(null);
     var data = ref[0];
     var setData = ref[1];
 
-    React.useEffect(function () {
+    React$1.useEffect(function () {
       d3.json(jsonUrl).then(function (topology) {
         var ref = topology.objects;
         var countries = ref.countries;
@@ -62,11 +66,11 @@
     'https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.csv';
 
   var useCountryCodes = function () {
-    var ref = React.useState(null);
+    var ref = React$1.useState(null);
     var data = ref[0];
     var setData = ref[1];
 
-    React.useEffect(function () {
+    React$1.useEffect(function () {
       d3.csv(csvUrl$1).then(setData);
     }, []);
 
@@ -84,15 +88,107 @@
   };
 
   var useData = function () {
-    var ref = React.useState(null);
+    var ref = React$1.useState(null);
     var data = ref[0];
     var setData = ref[1];
 
-    React.useEffect(function () {
+    React$1.useEffect(function () {
       d3.csv(csvUrl, row).then(setData);
     }, []);
 
     return data;
+  };
+
+  var missingDataColor = '#d8d8d8';
+
+  var WorldMap = function (ref) {
+    var ref_worldAtlas = ref.worldAtlas;
+    var countries = ref_worldAtlas.countries;
+    var interiors = ref_worldAtlas.interiors;
+    var path = ref.path;
+    var rowByNumericCode = ref.rowByNumericCode;
+    var emissions = ref.emissions;
+    var colorValue = ref.colorValue;
+    var colorScale = ref.colorScale;
+
+    return (
+    React.createElement( 'g', { className: "map" },
+      React.createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
+      countries.features.map(function (feature) {
+        var d = rowByNumericCode.get(feature.id);
+        return (
+          React.createElement( 'path', {
+            className: "countries", fill: (d && d.emissions < emissions) 
+                ? colorScale(colorValue(d)) 
+                : missingDataColor, onMouseEnter: function (e) { return d3.select(e.target).attr(
+                "fill",
+                d ? colorScale(colorValue(d)) : missingDataColor
+              ); }, onMouseLeave: function (e) { return d3.select(e.target).attr(
+                "fill",
+                (d && d.emissions < emissions) 
+                  ? colorScale(colorValue(d))
+                  : missingDataColor
+              ); }, d: path(feature) },
+            React.createElement( 'title', null,
+              feature.properties.name, ": ", d ? round(d.emissions, 3) + ' tonnes/capita' : 'n/a'
+            )
+          )
+        );
+      }),
+      React.createElement( 'path', { className: "interiors", d: path(interiors) })
+    )
+  );
+  };
+
+  var FlightRoutes = function (ref) {
+    var path = ref.path;
+    var projection = ref.projection;
+    var coordinates = ref.coordinates;
+
+    return (
+    React.createElement( 'g', { className: "routes" },
+      coordinates.map(function (ref) {
+        var src = ref[0];
+        var dst = ref[1];
+
+        var ref$1 = projection(src);
+        var x1 = ref$1[0];
+        var y1 = ref$1[1];
+        var ref$2 = projection(dst);
+        var x2 = ref$2[0];
+        var y2 = ref$2[1];
+        return (
+          React.createElement( React.Fragment, null,
+            React.createElement( 'circle', { cx: x1, cy: y1, r: 3 }),
+            React.createElement( 'circle', { cx: x2, cy: y2, r: 3 })
+          )
+        );
+      }),
+      React.createElement( 'path', {
+        className: "route", d: path({ type: "MultiLineString", coordinates: coordinates }) })
+    )
+  );
+  };
+
+  var projection = d3.geoEquirectangular();
+  var path = d3.geoPath(projection);
+
+  var FlightMap = function (ref) {
+    var worldAtlas = ref.worldAtlas;
+    var rowByNumericCode = ref.rowByNumericCode;
+    var colorValue = ref.colorValue;
+    var colorScale = ref.colorScale;
+    var emissions = ref.emissions;
+    var coordinates = ref.coordinates;
+
+    return (
+    React.createElement( React.Fragment, null,
+      React.createElement( WorldMap, { 
+        worldAtlas: worldAtlas, path: path, rowByNumericCode: rowByNumericCode, emissions: emissions, colorValue: colorValue, colorScale: colorScale }),
+      React.createElement( FlightRoutes, { 
+        path: path, projection: projection, coordinates: coordinates })
+    )
+  );
   };
 
   var width = 1024;
@@ -106,13 +202,7 @@
   // 133g/km for domestic flight, 102g/km for long haul flight
   var emissionsPerKm = (133 + 102) / 2;
 
-  var projection = d3.geoEquirectangular();
-  var path = d3.geoPath(projection);
-
   var selectedYear = '2019';
-  var missingDataColor = '#d8d8d8';
-
-  var round = function (n, d) { return Math.round(n * Math.pow(10, d)) / Math.pow(10, d); };
 
   var App = function () {
     var airports = useAirports();
@@ -120,15 +210,15 @@
     var countryCodes = useCountryCodes();
     var data = useData();
 
-    var inputRef = React.useRef();
-    var ref = React.useState([]);
+    var inputRef = React$1.useRef();
+    var ref = React$1.useState([]);
     var coordinates = ref[0];
     var setCoordinates = ref[1];
-    var ref$1 = React.useState(0);
+    var ref$1 = React$1.useState(0);
     var emissions = ref$1[0];
     var setEmissions = ref$1[1];
 
-    var handleSubmit = React.useCallback(function (_) {
+    var handleSubmit = React$1.useCallback(function (_) {
       var coords = [];
       var totalKm = inputRef.current.value.split('\n').map(function (route) {
         if (!route.match(routeRegex)) { return 0; }
@@ -179,50 +269,8 @@
     return (
       React__default['default'].createElement( React__default['default'].Fragment, null,
         React__default['default'].createElement( 'svg', { width: width, height: height },
-          React__default['default'].createElement( 'g', { className: "marks" },
-            React__default['default'].createElement( 'path', { className: "sphere", d: path({ type: 'Sphere' }) }),
-            worldAtlas.countries.features.map(function (feature) {
-              var d = rowByNumericCode.get(feature.id);
-              return (
-                React__default['default'].createElement( 'path', {
-                  className: "countries", fill: (d && d.emissions < emissions) 
-                      ? colorScale(colorValue(d)) 
-                      : missingDataColor, onMouseEnter: function (e) { return d3.select(e.target).attr(
-                      "fill",
-                      d ? colorScale(colorValue(d)) : missingDataColor
-                    ); }, onMouseLeave: function (e) { return d3.select(e.target).attr(
-                      "fill",
-                      (d && d.emissions < emissions) 
-                        ? colorScale(colorValue(d))
-                        : missingDataColor
-                    ); }, d: path(feature) },
-                  React__default['default'].createElement( 'title', null,
-                    feature.properties.name, ": ", d ? round(d.emissions, 3) + ' tonnes/capita' : 'n/a'
-                  )
-                )
-              );
-            }),
-            React__default['default'].createElement( 'path', { className: "interiors", d: path(worldAtlas.interiors) }),
-            coordinates.map(function (ref) {
-              var src = ref[0];
-              var dst = ref[1];
-
-              var ref$1 = projection(src);
-              var x1 = ref$1[0];
-              var y1 = ref$1[1];
-              var ref$2 = projection(dst);
-              var x2 = ref$2[0];
-              var y2 = ref$2[1];
-              return (
-                React__default['default'].createElement( React__default['default'].Fragment, null,
-                  React__default['default'].createElement( 'circle', { cx: x1, cy: y1, r: 3 }),
-                  React__default['default'].createElement( 'circle', { cx: x2, cy: y2, r: 3 })
-                )
-              );
-            }),
-            React__default['default'].createElement( 'path', {
-              className: "route", d: path({ type: "MultiLineString", coordinates: coordinates }) })
-          ),
+          React__default['default'].createElement( FlightMap, { 
+            worldAtlas: worldAtlas, rowByNumericCode: rowByNumericCode, colorValue: colorValue, colorScale: colorScale, emissions: emissions, coordinates: coordinates }),
           React__default['default'].createElement( 'text', { x: "10", y: height - 10, 'font-size': "small" }, "* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions in ", selectedYear, ".")
         ),
         React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code: ", React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React__default['default'].createElement( 'br', null ),
