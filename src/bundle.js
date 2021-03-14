@@ -223,7 +223,7 @@
             React__default['default'].createElement( 'path', {
               className: "route", d: path({ type: "MultiLineString", coordinates: coordinates }) })
           ),
-          React__default['default'].createElement( 'text', { x: "10", y: height - 10, 'font-size': "small" }, "* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions.")
+          React__default['default'].createElement( 'text', { x: "10", y: height - 10, 'font-size': "small" }, "* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions in ", selectedYear, ".")
         ),
         React__default['default'].createElement( 'div', null, "Enter routes among airpots in IATA 3-letter code: ", React__default['default'].createElement( 'button', { onClick: handleSubmit }, "Calculate total CO2 emissions"), React__default['default'].createElement( 'br', null ),
           React__default['default'].createElement( 'textarea', { ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 }),

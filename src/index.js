@@ -142,7 +142,7 @@ const App = () => {
             d={path({ type: "MultiLineString", coordinates: coordinates })}
           />
         </g>
-        <text x="10" y={height - 10} font-size="small">* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions.</text>
+        <text x="10" y={height - 10} font-size="small">* Colored countries represent that your flight emissions exceeded their per-capita yearly emissions in {selectedYear}.</text>
       </svg>
       <div>
         Enter routes among airpots in IATA 3-letter code: <button onClick={handleSubmit}>Calculate total CO2 emissions</button><br />
