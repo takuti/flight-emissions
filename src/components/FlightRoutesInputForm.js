@@ -15,7 +15,7 @@ export const FlightRoutesInputForm = ({
   setCoordinates,
 }) => (
   <span>
-    Enter routes among airpots in IATA 3-letter code:
+    Enter routes among airports in IATA 3-letter code:
     <br />
     <textarea
       ref={inputRef} 

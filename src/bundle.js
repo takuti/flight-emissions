@@ -206,7 +206,7 @@
     var setCoordinates = ref.setCoordinates;
 
     return (
-    React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'br', null ),
+    React.createElement( 'span', null, "Enter routes among airports in IATA 3-letter code: ", React.createElement( 'br', null ),
       React.createElement( 'textarea', {
         ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 }),
       React.createElement( 'br', null ),
