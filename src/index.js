@@ -12,6 +12,7 @@ import { useCountryCodes } from './data/useCountryCodes';
 import { usePerCapitaEmissions } from './data/usePerCapitaEmissions';
 import { FlightMap } from './components/FlightMap';
 import { FlightRoutesInputForm } from './components/FlightRoutesInputForm';
+import { SVGDownloadButton } from './components/SVGDownloadButton';
 
 const width = 1024;
 const height = 512;
@@ -78,6 +79,11 @@ const App = () => {
           inputRef={inputRef} 
           setEmissions={setEmissions}
           setCoordinates={setCoordinates}
+        />
+        <br />
+        <SVGDownloadButton 
+          width={width}
+          height={height}
         />
         <ul>
           <li>Total CO2 emissions from your flights: <b>{round(emissions, 3)} tonnes</b></li>

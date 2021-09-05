@@ -16,6 +16,13 @@ export const FlightRoutesInputForm = ({
 }) => (
   <span>
     Enter routes among airpots in IATA 3-letter code:
+    <br />
+    <textarea
+      ref={inputRef} 
+      placeholder='HND-SFO\nSFO-JFK\nJFK-NRT' 
+      rows={10}
+    />
+    <br />
     <button onClick={() => {
       const coords = [];
       const totalKm = inputRef.current.value.split('\n').map((route) => {
@@ -32,11 +39,5 @@ export const FlightRoutesInputForm = ({
     }}>
       Calculate total CO2 emissions
     </button>
-    <br />
-    <textarea
-      ref={inputRef} 
-      placeholder='HND-SFO\nSFO-JFK\nJFK-NRT' 
-      rows={10}
-    />
   </span>
 );

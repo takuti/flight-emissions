@@ -206,7 +206,11 @@
     var setCoordinates = ref.setCoordinates;
 
     return (
-    React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'button', { onClick: function () {
+    React.createElement( 'span', null, "Enter routes among airpots in IATA 3-letter code: ", React.createElement( 'br', null ),
+      React.createElement( 'textarea', {
+        ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 }),
+      React.createElement( 'br', null ),
+      React.createElement( 'button', { onClick: function () {
         var coords = [];
         var totalKm = inputRef.current.value.split('\n').map(function (route) {
           if (!route.match(routeRegex)) { return 0; }
@@ -221,11 +225,68 @@
         var emissions = totalKm * emissionsPerKm / 1000000;
         setEmissions(emissions);
         setCoordinates(coords);
-      } }, "Calculate total CO2 emissions"),
-      React.createElement( 'br', null ),
-      React.createElement( 'textarea', {
-        ref: inputRef, placeholder: 'HND-SFO\nSFO-JFK\nJFK-NRT', rows: 10 })
+      } }, "Calculate total CO2 emissions")
     )
+  );
+  };
+
+  var loadStyle = function () {
+      var sheet = document.styleSheets[1];
+    
+      var styleRules = [];
+      for (var i = 0; i < sheet.cssRules.length; i++)
+        { styleRules.push(sheet.cssRules.item(i).cssText); }
+    
+      var style = document.createElement("style");
+      style.type = "text/css";
+      style.appendChild(document.createTextNode(styleRules.join(' ')));
+    
+      return style;
+  };
+  var style = loadStyle();
+    
+  var SVGDownloadButton = function (ref) {
+    var width = ref.width;
+    var height = ref.height;
+
+    return (
+      React.createElement( 'button', { onClick: function () {
+          // fetch SVG-rendered image as a blob object
+          var svg = document.querySelector('svg');
+          svg.insertBefore(style, svg.firstChild); // CSS must be explicitly embedded
+          var data = (new XMLSerializer()).serializeToString(svg);
+          var svgBlob = new Blob([data], {
+          type: 'image/svg+xml;charset=utf-8'
+          });
+      
+          svg.removeChild(svg.childNodes[0]); // remove temporarily injected CSS
+      
+          // convert the blob object to a dedicated URL
+          var url = URL.createObjectURL(svgBlob);
+      
+          // load the SVG blob to a flesh image object
+          var img = new Image();
+          img.addEventListener('load', function () {
+          // draw the image on an ad-hoc canvas
+          var canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+      
+          var context = canvas.getContext('2d');
+          context.drawImage(img, 0, 0, width, height);
+      
+          URL.revokeObjectURL(url);
+      
+          // trigger a synthetic download operation with a temporary link
+          var a = document.createElement('a');
+          a.download = "map.png";
+          document.body.appendChild(a);
+          a.href = canvas.toDataURL();
+          a.click();
+          a.remove();
+          });
+          img.src = url;
+      } }, "Download")
   );
   };
 
@@ -289,6 +350,9 @@
         React__default['default'].createElement( 'div', null,
           React__default['default'].createElement( FlightRoutesInputForm, { 
             airports: airports, inputRef: inputRef, setEmissions: setEmissions, setCoordinates: setCoordinates }),
+          React__default['default'].createElement( 'br', null ),
+          React__default['default'].createElement( SVGDownloadButton, { 
+            width: width, height: height }),
           React__default['default'].createElement( 'ul', null,
             React__default['default'].createElement( 'li', null, "Total CO2 emissions from your flights: ", React__default['default'].createElement( 'b', null, round(emissions, 3), " tonnes" ) ),
             React__default['default'].createElement( 'li', null, "Global average of yearly emissions per capita in ", selectedYear, ": ", React__default['default'].createElement( 'b', null, round(rowByNumericCode.get(undefined).emissions, 3), " tonnes" ), " [", React__default['default'].createElement( 'a', { href: "https://ourworldindata.org/per-capita-co2", target: "_blank" }, "source"), "]" )
